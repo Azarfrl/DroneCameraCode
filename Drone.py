@@ -23,11 +23,20 @@ def save():
     json.dump(faces,open(DB,"w"))
 
 def recognise(f):
-    if not faces:return"Unknown",0
-    scores=[(n,recognizer.match(f,np.array(v,np.float32),
-             cv2.FaceRecognizerSF_FR_COSINE)) for n,v in faces.items()]
+    if not faces:
+        return "Unknown",0
+    scores=[]
+    for n,v in faces.items():
+        saved=np.array(v,np.float32).reshape(1,-1)
+        current=np.array(f,np.float32).reshape(1,-1)
+        if saved.shape!=current.shape:
+            continue
+        scores.append((n,recognizer.match(current,saved,
+            cv2.FaceRecognizerSF_FR_COSINE)))
+    if not scores:
+        return "Unknown",0
     n,s=max(scores,key=lambda x:x[1])
-    return (n,s) if s>=.363 else("Unknown",s)
+    return (n,s) if s>=.363 else ("Unknown",s)
 
 cam=cv2.VideoCapture(0)
 cam.set(3,640);cam.set(4,480)
@@ -35,7 +44,8 @@ current=None
 
 while True:
     ok,frame=cam.read()
-    if not ok:break
+    if not ok:
+        break
     frame=cv2.flip(frame,1)
 
     h,w=frame.shape[:2]
@@ -46,7 +56,8 @@ while True:
     # Human detection
     
     for b in yolo(frame,conf=.45,verbose=False)[0].boxes:
-        if int(b.cls[0])!=0:continue
+        if int(b.cls[0])!=0:
+            continue
         human=True
         x1,y1,x2,y2=map(int,b.xyxy[0])
         boxes.append((x1,y1,x2,y2))
