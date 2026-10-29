@@ -65,7 +65,7 @@ def recognise_face(feature):
 def estimate_distance(face_width):
     return known_face_width * focal_length / face_width
 
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
